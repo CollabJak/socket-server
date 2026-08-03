@@ -169,7 +169,9 @@ const consumeSocketJti = async (jti) => {
   }
 
   if (SOCKET_JTI_REPLAY_STRICT) {
-    await redisClient.del(redisKey);
+    // Apply a 30-second grace period TTL to allow multi-step handshakes / transport upgrades
+    // without failing subsequent auth checks within the valid session window.
+    await redisClient.expire(redisKey, 30);
   }
 };
 
